@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using TodoApi.Models.ModelConfigurations;
 
 public class TodoContext : DbContext
 {
@@ -8,4 +9,7 @@ public class TodoContext : DbContext
     }
 
     public DbSet<TodoItem> TodoItems { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+        => modelBuilder.ApplyConfiguration(new TodoItemConfiguration());
 }

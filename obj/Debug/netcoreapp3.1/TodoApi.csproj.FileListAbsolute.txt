@@ -124,3 +124,8 @@ C:\Users\Ilya\WebServer\TodoApi\bin\Debug\netcoreapp3.1\ru\Microsoft.CodeAnalysi
 C:\Users\Ilya\WebServer\TodoApi\bin\Debug\netcoreapp3.1\tr\Microsoft.CodeAnalysis.Workspaces.resources.dll
 C:\Users\Ilya\WebServer\TodoApi\bin\Debug\netcoreapp3.1\zh-Hans\Microsoft.CodeAnalysis.Workspaces.resources.dll
 C:\Users\Ilya\WebServer\TodoApi\bin\Debug\netcoreapp3.1\zh-Hant\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\Ilya\WebServer\TodoApi\bin\Debug\netcoreapp3.1\MySqlConnector.dll
+C:\Users\Ilya\WebServer\TodoApi\bin\Debug\netcoreapp3.1\Pomelo.EntityFrameworkCore.MySql.dll
+C:\Users\Ilya\WebServer\TodoApi\bin\Debug\netcoreapp3.1\Pomelo.JsonObject.dll
+C:\Users\Ilya\WebServer\TodoApi\bin\Debug\netcoreapp3.1\Npgsql.dll
+C:\Users\Ilya\WebServer\TodoApi\bin\Debug\netcoreapp3.1\Npgsql.EntityFrameworkCore.PostgreSQL.dll
