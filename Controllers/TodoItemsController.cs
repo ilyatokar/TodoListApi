@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TodoApi.Models;
 
 namespace TodoApi.Controllers
 {
@@ -13,10 +16,12 @@ namespace TodoApi.Controllers
     public class TodoItemsController : Controller
     {
         private readonly TodoContext _context;
+        private readonly IHttpClientFactory _clientFactory;
 
-        public TodoItemsController(TodoContext context)
+        public TodoItemsController(TodoContext context, IHttpClientFactory clientFactory)
         {
             _context = context;
+            _clientFactory = clientFactory;
         }
 
         // GET: api/TodoItems
@@ -27,124 +32,96 @@ namespace TodoApi.Controllers
             return Ok(items);
         }
 
+        // GET: api/TodoItems/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<TodoItem>> GetTodoItem(int id)
+        {
+            var todoItem = await _context.TodoItems.FindAsync(id);
+
+            if (todoItem == null)
+            {
+                return NotFound();
+            }
+
+            return todoItem;
+        }
+
+        // DELETE: api/TodoItems/5
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<TodoItem>> DeleteTodoItem(int id)
+        {
+            var todoItem = await _context.TodoItems.FindAsync(id);
+            if (todoItem == null)
+            {
+                return NotFound();
+            }
+
+            _context.TodoItems.Remove(todoItem);
+            await _context.SaveChangesAsync();
+
+            return todoItem;
+        }
+
         // POST: api/TodoItems
         [HttpPost]
-        public IActionResult CreateTodoItem()
+        public ActionResult<String> CreateTodoItem([FromBody]TodoItemAdd todoItemAdd)
         {
+            if(todoItemAdd.Title == null || todoItemAdd.Body == null)
+            {
+                return BadRequest(new { message = "Title or body is incorrect" });;
+            }
+            
+            // var todoItems = _context.TodoItems
+               // .Where(b => b.Title.Contains(todoItemAdd.Title.ToString())).ToList();
+
+            var todoItems = _context.TodoItems
+                .Where(b => b.OnCreate >= DateTime.Now && 
+                    b.OnCreate <=DateTime.Now.AddDays(1) && 
+                    b.Title.Contains(todoItemAdd.Title.ToString())
+                ).ToList();
+                
+            if(todoItems.Count != 0){
+                return BadRequest(new { message = "A task with the same Name already exists." });
+            }
+
             TodoItem item = new TodoItem()
             {
-                Title = "Hello, world!",
-                Body = "Test task!"
+                Title = todoItemAdd.Title,
+                Body = todoItemAdd.Body,
+                UserId = 12
             };
+
             _context.Add(item);
             _context.SaveChanges();
+
             return Ok("Create item");
         }
+
+
+        [HttpGet("testprint")]
+        public IActionResult PrintResult([FromBody]TodoItemAdd todoItemAdd)
+        {
+            if(todoItemAdd.Title == null || todoItemAdd.Body == null)
+            {
+                return BadRequest(new { message = "Username or password is incorrect" });;
+            }
+            return Ok(todoItemAdd);
+        }
+
+        // GET: api/TodoItems
+        [HttpGet("testhttp")]
+        public async Task<ActionResult<String>> OnGet()
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get,
+                "https://jsonplaceholder.typicode.com/todos/1");
+            request.Headers.Add("User-Agent", "HttpClientFactory-Sample");
+
+            var client = _clientFactory.CreateClient();
+            var response = await client.SendAsync(request);
+            var data = await response.Content.ReadAsStringAsync();
+
+            return data;
+        }
+
     }
-    //public class TodoItemsController : ControllerBase
-    //{
-    //     private readonly TodoContext _context;
-
-    //     public TodoItemsController(TodoContext context)
-    //     {
-    //         _context = context;
-    //     }
-
-    //     // GET: api/TodoItems
-    //     [HttpGet]
-    //     public async Task<ActionResult<IEnumerable<TodoItem>>> GetTodoItems()
-    //     {
-    //         return await _context.TodoItems.ToListAsync();
-    //     }
-
-        
-    //     // GET: api/TodoItems/5
-    //     [HttpGet("{id}")]
-    //     public async Task<ActionResult<TodoItem>> GetTodoItem(long id)
-    //     {
-    //         var todoItem = await _context.TodoItems.FindAsync(id);
-
-    //         if (todoItem == null)
-    //         {
-    //             return NotFound();
-    //         }
-
-    //         return todoItem;
-    //     }
-
-    //     // GET: api/TodoItems/test
-    //     [HttpGet("test/")]
-    //     public  ActionResult<String>  HelloTodoItem()
-    //     {
-    //         String test = "Hello, world!";
-    //         return test;
-    //     }
-
-
-    //     // PUT: api/TodoItems/5
-    //     // To protect from overposting attacks, please enable the specific properties you want to bind to, for
-    //     // more details see https://aka.ms/RazorPagesCRUD.
-    //     [HttpPut("{id}")]
-    //     public async Task<IActionResult> PutTodoItem(long id, TodoItem todoItem)
-    //     {
-    //         if (id != todoItem.Id)
-    //         {
-    //             return BadRequest();
-    //         }
-
-    //         _context.Entry(todoItem).State = EntityState.Modified;
-
-    //         try
-    //         {
-    //             await _context.SaveChangesAsync();
-    //         }
-    //         catch (DbUpdateConcurrencyException)
-    //         {
-    //             if (!TodoItemExists(id))
-    //             {
-    //                 return NotFound();
-    //             }
-    //             else
-    //             {
-    //                 throw;
-    //             }
-    //         }
-
-    //         return NoContent();
-    //     }
-
-    //     // POST: api/TodoItems
-    //     // To protect from overposting attacks, please enable the specific properties you want to bind to, for
-    //     // more details see https://aka.ms/RazorPagesCRUD.
-    //     [HttpPost]
-    //     public async Task<ActionResult<TodoItem>> PostTodoItem(TodoItem todoItem)
-    //     {
-    //         _context.TodoItems.Add(todoItem);
-    //         await _context.SaveChangesAsync();
-
-    //         //return CreatedAtAction("GetTodoItem", new { id = todoItem.Id }, todoItem);
-    //         return CreatedAtAction(nameof(GetTodoItem), new { id = todoItem.Id }, todoItem);
-    //     }
-
-    //     // DELETE: api/TodoItems/5
-    //     [HttpDelete("{id}")]
-    //     public async Task<ActionResult<TodoItem>> DeleteTodoItem(long id)
-    //     {
-    //         var todoItem = await _context.TodoItems.FindAsync(id);
-    //         if (todoItem == null)
-    //         {
-    //             return NotFound();
-    //         }
-
-    //         _context.TodoItems.Remove(todoItem);
-    //         await _context.SaveChangesAsync();
-
-    //         return todoItem;
-    //     }
-
-    //     private bool TodoItemExists(long id)
-    //     {
-    //         return _context.TodoItems.Any(e => e.Id == id);
-    //     }
-    // }
 }
