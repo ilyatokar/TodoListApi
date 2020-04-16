@@ -24,7 +24,7 @@ namespace TodoApi.Controllers
             _clientFactory = clientFactory;
         }
 
-        // GET: api/TodoItems
+        // GET: api/TodoItems (Get All Items)
         [HttpGet]
         public IActionResult GetTodoItem()
         {
@@ -32,7 +32,7 @@ namespace TodoApi.Controllers
             return Ok(items);
         }
 
-        // GET: api/TodoItems/5
+        // GET: api/TodoItems/5 (Get item)
         [HttpGet("{id}")]
         public async Task<ActionResult<TodoItem>> GetTodoItem(int id)
         {
@@ -46,7 +46,7 @@ namespace TodoApi.Controllers
             return todoItem;
         }
 
-        // DELETE: api/TodoItems/5
+        // DELETE: api/TodoItems/5 (Remove Item)
         [HttpDelete("{id}")]
         public async Task<ActionResult<TodoItem>> DeleteTodoItem(int id)
         {
@@ -62,7 +62,7 @@ namespace TodoApi.Controllers
             return todoItem;
         }
 
-        // POST: api/TodoItems
+        // POST: api/TodoItems  (Added Item)
         [HttpPost]
         public ActionResult<String> CreateTodoItem([FromBody]TodoItemAdd todoItemAdd)
         {
@@ -70,16 +70,14 @@ namespace TodoApi.Controllers
             {
                 return BadRequest(new { message = "Title or body is incorrect" });;
             }
-            
-            // var todoItems = _context.TodoItems
-               // .Where(b => b.Title.Contains(todoItemAdd.Title.ToString())).ToList();
 
+            // Получился очень странный запрос нужно с ним поработать))
             var todoItems = _context.TodoItems
                 .Where(b => b.OnCreate >= DateTime.Now && 
                     b.OnCreate <=DateTime.Now.AddDays(1) && 
                     b.Title.Contains(todoItemAdd.Title.ToString())
                 ).ToList();
-                
+
             if(todoItems.Count != 0){
                 return BadRequest(new { message = "A task with the same Name already exists." });
             }
