@@ -8264,28 +8264,33 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Ilya\\.nuget\\packages\\": {},
+    "C:\\Users\\User\\.nuget\\packages\\": {},
+    "C:\\Microsoft\\Xamarin\\NuGet\\": {},
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Ilya\\WebServer\\TodoApi\\TodoApi.csproj",
+      "projectUniqueName": "C:\\Users\\User\\source\\TodoListApi\\TodoApi.csproj",
       "projectName": "TodoApi",
-      "projectPath": "C:\\Users\\Ilya\\WebServer\\TodoApi\\TodoApi.csproj",
-      "packagesPath": "C:\\Users\\Ilya\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Ilya\\WebServer\\TodoApi\\obj\\",
+      "projectPath": "C:\\Users\\User\\source\\TodoListApi\\TodoApi.csproj",
+      "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\User\\source\\TodoListApi\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
+        "C:\\Microsoft\\Xamarin\\NuGet\\",
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "C:\\Users\\Ilya\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
       ],
       "originalTargetFrameworks": [
         "netcoreapp3.1"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -8347,7 +8352,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.200\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.201\\RuntimeIdentifierGraph.json"
       }
     }
   }
