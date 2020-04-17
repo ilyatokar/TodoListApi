@@ -28,7 +28,7 @@ namespace TodoApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<TodoContext>(opt =>
-               opt.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+               opt.UseNpgsql("Server=192.168.10.10; Port=5432; Database=todolist; username=postgres; password=secret;"));
             services.AddControllers();
             services.AddHttpClient();
         }
@@ -36,8 +36,12 @@ namespace TodoApi
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+
             app.UseMiddleware<AuthCheck>();
-            app.UseHttpsRedirection();
 
             app.UseRouting();
 
