@@ -104,7 +104,7 @@ namespace TodoApi.Controllers
 
         // POST: api/TodoItems  (Added Item)
         [HttpPost]
-        public async Task<ActionResult<String>> CreateTodoItem(TodoItemAdd todoItemAdd, bool completed)
+        public async Task<ActionResult<String>> CreateTodoItem(TodoItemAdd todoItemAdd)
         {
             Getlogin userinfo = await GetloginUser();
 
@@ -128,19 +128,28 @@ namespace TodoApi.Controllers
             if(todoItems.Count != 0){
                 return BadRequest(new { message = "A task with the same Name already exists." });
             }
-            long statusId = await CreateItem(completed);
-            if (statusId == -1)
-            {
-                return BadRequest("Status can't be saved");
-            }
             TodoItem item = new TodoItem()
             {
                 Title = todoItemAdd.Title,
                 Body = todoItemAdd.Body,
                 UserId = userinfo.id,
             };
-            _dbcontext.Add(item);
-            _dbcontext.SaveChanges();
+            
+            try{
+                _dbcontext.Add(item);
+                _dbcontext.SaveChanges();
+            }catch (InvalidOperationException){
+                return BadRequest("can't be created task");
+            }
+
+            long statusId = await CreateItem(item.id);
+            if (statusId == -1)
+            {
+                return BadRequest("Status can't be saved");
+            }
+
+            
+            
             var response = new { id = item.id };
             return Ok(response);
         }
@@ -229,14 +238,13 @@ namespace TodoApi.Controllers
                 return false;
             }
         }
-        private async Task<long> CreateItem(bool completed)
+        private async Task<long> CreateItem(long id)
         {
-            string uri = ConnectionsInfo.StatusHost + $"/api/todostatus/new/{completed}";
+            string uri = ConnectionsInfo.StatusHost + $"/api/todostatus/new/{id}/";
             HttpClient _client = _clientFactory.CreateClient();
             var requestMessage = new HttpRequestMessage(HttpMethod.Post, uri);
-            requestMessage.Headers.Add("User-Agent", "HttpClientFactory-Sample");
             var Authorization = Request.Headers["Authorization"].ToString();
-            requestMessage.Headers.Add("Autthorization", Authorization);
+            requestMessage.Headers.Add("Authorization", Authorization);
             var response = await _client.SendAsync(requestMessage);
             var content = await response.Content.ReadAsStringAsync();
             if (response.IsSuccessStatusCode)
