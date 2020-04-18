@@ -21,7 +21,6 @@ namespace TodoApi.Controllers
     {
         private readonly TodoContext _dbcontext;
         private readonly IHttpClientFactory _clientFactory;
-
         private Getlogin _userinfo;
 
         public TodoItemsController(TodoContext dbcontext, IHttpClientFactory clientFactory)
@@ -154,8 +153,8 @@ namespace TodoApi.Controllers
             return Ok(response);
         }
 
-        [HttpPut]
-        public async Task<ActionResult<String>> PutTodoItem(TodoItem changedItem, bool completed)
+        [HttpPut("{id}")]
+        public async Task<ActionResult<String>> PutTodoItem(TodoItem changedItem, long id)
         {
             Getlogin userinfo = await GetloginUser();
 
@@ -164,19 +163,30 @@ namespace TodoApi.Controllers
                 Response.StatusCode = 401;
                 await Response.WriteAsync("Пользователь не авторизован");
             }
-            TodoItem item = _dbcontext.TodoItems.SingleOrDefault(c => c.id==changedItem.id);
-            if (item!=null && item.UserId == userinfo.id)
+            if (id != changedItem.id)
             {
-                bool done = await PutItem(item.id, completed);
-                if (!done)
-                    return StatusCode(500, "Something went wrong");
-                _dbcontext.Update(changedItem);
-                _dbcontext.SaveChanges();
-                var response = new { id = item.id };
-                return Ok(response);
+                return BadRequest();
             }
-            return BadRequest();
+            
+            _dbcontext.Entry(changedItem).State = EntityState.Modified;
+
+            try
+            {
+                await _dbcontext.SaveChangesAsync();
             }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!TodoItemExists(id))
+                {
+                    return BadRequest();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+             return NoContent();
+        }
         
 
         public async Task<Getlogin> GetloginUser()
@@ -219,25 +229,26 @@ namespace TodoApi.Controllers
             else
                 return false;
         }
-        private async Task<bool> PutItem(int task_id, bool completed)
-        {
-            string uri = ConnectionsInfo.StatusHost + $"/api/todostatus/new/{task_id}/{completed}";
-            HttpClient _client = _clientFactory.CreateClient();
-            var requestMessage = new HttpRequestMessage(HttpMethod.Put, uri);
-            requestMessage.Headers.Add("User-Agent", "HttpClientFactory-Sample");
-            var Authorization = Request.Headers["Authorization"].ToString();
-            requestMessage.Headers.Add("Autthorization", Authorization);
-            var response = await _client.SendAsync(requestMessage);
-            var content = await response.Content.ReadAsStringAsync();
-            if (response.IsSuccessStatusCode)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
+        // private async Task<bool> PutItem(int task_id, bool completed)
+        // {
+        //     string uri = ConnectionsInfo.StatusHost + $"/api/todostatus/new/{task_id}/{completed}";
+        //     HttpClient _client = _clientFactory.CreateClient();
+        //     var requestMessage = new HttpRequestMessage(HttpMethod.Put, uri);
+        //     requestMessage.Headers.Add("User-Agent", "HttpClientFactory-Sample");
+        //     var Authorization = Request.Headers["Authorization"].ToString();
+        //     requestMessage.Headers.Add("Autthorization", Authorization);
+        //     var response = await _client.SendAsync(requestMessage);
+        //     var content = await response.Content.ReadAsStringAsync();
+        //     if (response.IsSuccessStatusCode)
+        //     {
+        //         return true;
+        //     }
+        //     else
+        //     {
+        //         return false;
+        //     }
+        // }
+
         private async Task<long> CreateItem(long id)
         {
             string uri = ConnectionsInfo.StatusHost + $"/api/todostatus/new/{id}/";
@@ -274,6 +285,11 @@ namespace TodoApi.Controllers
             {
                 return "";
             }
+        }
+
+        private bool TodoItemExists(long id)
+        {
+            return _dbcontext.TodoItems.Any(e => e.id == id);
         }
 
     }
