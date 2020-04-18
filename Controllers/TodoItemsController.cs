@@ -154,7 +154,7 @@ namespace TodoApi.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<String>> PutTodoItem(TodoItem changedItem, long id)
+        public async Task<ActionResult<String>> PutTodoItem(TodoItem changedItem, int id)
         {
             Getlogin userinfo = await GetloginUser();
 
@@ -163,12 +163,16 @@ namespace TodoApi.Controllers
                 Response.StatusCode = 401;
                 await Response.WriteAsync("Пользователь не авторизован");
             }
-            if (id != changedItem.id)
+            TodoItem item = _dbcontext.TodoItems.FirstOrDefault(x => x.id == id);
+            
+            if (item == null)
             {
                 return BadRequest();
             }
-            
-            _dbcontext.Entry(changedItem).State = EntityState.Modified;
+
+            item.Title = changedItem.Title;
+            item.Body = changedItem.Body;
+            _dbcontext.Entry(item).State = EntityState.Modified;
 
             try
             {
